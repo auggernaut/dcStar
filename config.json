@@ -1,0 +1,9 @@
+{
+   "sendgrid_username": "SENDGRID_USERNAME",
+   "sendgrid_key": "SENDGRID_KEY",
+   "couch_host": "COUCH_HOST",
+   "couch_port": "COUCH_PORT",
+   "couch_db": "COUCH_DB",
+   "couch_admin": "COUCH_ADMIN",
+   "couch_password": "COUCH_PASSWORD"
+}

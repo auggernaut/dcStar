@@ -1,0 +1,13 @@
+{
+  "name"          : "StarDust",
+  "description"   : "Handles user data storage for a StarTier app.",
+  "url"           : "http://github.com/auggernaut/stardust",
+  "keywords"      : ["startier"],
+  "author"        : "Augustin Bralley",
+  "contributors"  : [],
+  "dependencies"  : ["express", "sendgrid-web"],
+  "engines"       : { "node": "0.6.x" },
+  "lib"           : "./lib",
+  "main"          : "index",
+  "version"       : "0.1.0"
+}
