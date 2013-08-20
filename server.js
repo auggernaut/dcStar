@@ -10,7 +10,9 @@ var url = require('url'),
 app.use(express.bodyParser());
 
 var config = utils.loadConfig();
-var port = process.env.PORT || config.port || 9999;
+console.log('Configuration');
+console.log(config);
+var port = process.env.PORT || config.port || 666;
 var domain = "http://" + config.couch_host + ':' + config.couch_port;
 
 
@@ -21,7 +23,7 @@ app.listen(port, null, function (err) {
 });
 
 
-// Convenience for allowing CORS on routes - GET only
+// Convenience for allowing CORS on routes
 app.all('*', function (req, res, next) {
    res.header('Access-Control-Allow-Origin', '*');
    res.header('Access-Control-Allow-Methods', 'GET, POST');
@@ -30,22 +32,22 @@ app.all('*', function (req, res, next) {
 });
 
 
-app.post('/register', function (req, res) {
-   console.log("/register");
+app.post('/seed', function (req, res) {
+   console.log("/seed");
 
-   //TODO: replace with OAuth2 implementation
-   //Only clients of an approved StarCore app can register
-   if (req.body.appSecret === config.appSecret) {
+   //TODO: Only clients of an approved StarCore app can register
+   //if (req.body.appSecret === config.appSecret) {
 
       //create User
-      couch.createUser( req.body, function (err, user) {
+      couch.createUser(req.body, function (err, user) {
 
          //create DB
-         couch.createDB(config.appName, req.body, function (err, dbname) {
-            res.json(err ? err : {url: domain + "/" + dbname});
+         couch.createDB(config.app_name, req.body, function (err, dbname) {
+            res.json(err ? {error: err} : { db: domain + "/" + dbname, username: user } );
          });
       });
-   }
+
+   //}
 });
 
 
