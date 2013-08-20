@@ -10,3 +10,13 @@ Functions:
 * authentication
 * persisting user data (dust)
 * managing access to dust
+
+
+login
+
+sync
+
+seed
+
+share
+

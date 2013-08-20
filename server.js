@@ -12,7 +12,7 @@ app.use(express.bodyParser());
 var config = utils.loadConfig();
 console.log('Configuration');
 console.log(config);
-var port = process.env.PORT || config.port || 666;
+var port = process.env.PORT || config.couch_port || 4242;
 var domain = "http://" + config.couch_host + ':' + config.couch_port;
 
 

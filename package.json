@@ -5,7 +5,7 @@
   "keywords"      : ["startier"],
   "author"        : "Augustin Bralley",
   "contributors"  : [],
-  "dependencies"  : ["express", "sendgrid-web"],
+  "dependencies"  : ["express", "sendgrid-web", "q", "nano"],
   "engines"       : { "node": "0.6.x" },
   "lib"           : "./lib",
   "main"          : "index",
