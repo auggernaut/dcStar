@@ -9,17 +9,14 @@ var url = require('url'),
 
 app.use(express.bodyParser());
 
-var config = utils.loadConfig();
-console.log('Configuration');
-console.log(config);
-var port = process.env.PORT || config.couch_port || 4242;
-var domain = "http://" + config.couch_host + ':' + config.couch_port;
+var port = process.env.PORT || 4242;
+var domain = process.env.HOST || "http://localhost:" + port;
 
 
 app.listen(port, null, function (err) {
    if (err)
       console.log('Error: ' + err);
-   console.log('StarDust, at your service: http://localhost:' + port);
+   console.log('StarDust, at your service: ' + domain);
 });
 
 
@@ -42,8 +39,8 @@ app.post('/seed', function (req, res) {
       couch.createUser(req.body, function (err, user) {
 
          //create DB
-         couch.createDB(config.app_name, req.body, function (err, dbname) {
-            res.json(err ? {error: err} : { db: domain + "/" + dbname, username: user } );
+         couch.createDB(req.body, function (err, dburl) {
+            res.json(err ? {error: err} : { db: dburl, username: user } );
          });
       });
 
