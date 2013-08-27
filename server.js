@@ -32,48 +32,37 @@ app.all('*', function (req, res, next) {
 });
 
 
-app.post('/seed', function (req, res) {
-   console.log("/seed");
+app.post('/register', function (req, res) {
+   console.log("/register");
 
    //TODO: Only clients of an approved StarCore app can register
    //if (req.body.appSecret === config.appSecret) {
 
-      //create User
-      couch.createUser(req.body, function (err, user) {
+   //create User
+   couch.createUser(req.body, function (err, user) {
 
-         //create DB
-         couch.createDB(config.app_name, req.body, function (err, dbname) {
-            res.json(err ? {error: err} : { db: domain + "/" + dbname, username: user } );
-         });
+      //create DB
+      couch.createDB(config.app_name, req.body, function (err, dbname) {
+         res.json(err ? {error: err} : { db: domain + "/" + dbname, username: user });
       });
+   });
 
    //}
 });
 
 
-
-
-app.post('/login', function (req, res) {
-   console.log("/login");
+app.post('/lookup', function (req, res) {
+   console.log("/lookup");
 
    couch.getUser(req.body.username, function (err, user) {
-      if (user) {
-         if (req.body.password === user.password) {    //TODO: hash before compare
-            res.json({url: domain + "/" + req.body.username + "_" + config.appName});
-         } else {
-            res.json({error: "invalid credentials"});
-         }
-      } else if (err) {
-         res.json(err);
-      } else {
 
-      }
+
+         res.json(err ? {error: err} : { db: domain + "/" + user.dbname, username: user.name });
+
    });
 
 
 });
-
-
 
 
 app.post('/message', function (req, res) {
@@ -82,9 +71,9 @@ app.post('/message', function (req, res) {
 });
 
 
-app.get('/get/:doc', function (req, res) {
-   var code = req.params.code;
-   console.log('doc/' + code);
+app.get('/dust/:id', function (req, res) {
+   var id = req.params.id;
+   console.log('id/' + id);
 
 });
 
