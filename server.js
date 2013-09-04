@@ -10,10 +10,7 @@ var url = require('url'),
 app.use(express.bodyParser());
 
 var config = utils.loadConfig();
-console.log('Configuration');
-console.log(config);
-var port = process.env.PORT || config.couch_port || 4242;
-var domain = "http://" + config.couch_host + ':' + config.couch_port;
+var port = process.env.PORT || config.stardust_port || 9999;
 
 
 app.listen(port, null, function (err) {
@@ -39,11 +36,11 @@ app.post('/register', function (req, res) {
    //if (req.body.appSecret === config.appSecret) {
 
    //create User
-   couch.createUser(req.body, function (err, user) {
+   couch.createUser(req.body.creds, function (err, user) {
 
       //create DB
-      couch.createDB(config.app_name, req.body, function (err, dbname) {
-         res.json(err ? {error: err} : { db: domain + "/" + dbname, username: user });
+      couch.createDB(req.body.appname, req.body.creds, function (err, dbname) {
+         res.json(err ? { error: err } : { db: dbname });
       });
    });
 
@@ -54,13 +51,7 @@ app.post('/register', function (req, res) {
 app.post('/lookup', function (req, res) {
    console.log("/lookup");
 
-   couch.getUser(req.body.username, function (err, user) {
-
-
-         res.json(err ? {error: err} : { db: domain + "/" + user.dbname, username: user.name });
-
-   });
-
+   res.json( { db : couch.getUserDB(req.body.username, req.body.appname) } );
 
 });
 

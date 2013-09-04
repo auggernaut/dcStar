@@ -5,5 +5,5 @@
    "couch_port": "COUCH_PORT",
    "couch_admin": "COUCH_ADMIN",
    "couch_password": "COUCH_PASSWORD",
-   "app_name": "gratzi"
+   "stardust_port": "STARDUST_PORT"
 }
