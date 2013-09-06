@@ -32,14 +32,14 @@ app.all('*', function (req, res, next) {
 app.post('/register', function (req, res) {
    console.log("/register");
 
-   //TODO: Only clients of an approved StarCore app can register
+   //TODO: Only clients of an approved app can register
    //if (req.body.appSecret === config.appSecret) {
 
    //create User
    couch.createUser(req.body.creds, function (err, user) {
 
       //create DB
-      couch.createDB(req.body.appname, req.body.creds, function (err, dbname) {
+      couch.createDB(req.body.app, req.body.creds, function (err, dbname) {
          res.json(err ? { error: err } : { db: dbname });
       });
    });
@@ -51,7 +51,7 @@ app.post('/register', function (req, res) {
 app.post('/lookup', function (req, res) {
    console.log("/lookup");
 
-   res.json( { db : couch.getUserDB(req.body.username, req.body.appname) } );
+   res.json({ db: couch.getUserDB(req.body.user, req.body.app) });
 
 });
 
@@ -62,9 +62,14 @@ app.post('/message', function (req, res) {
 });
 
 
-app.get('/dust/:id', function (req, res) {
-   var id = req.params.id;
-   console.log('id/' + id);
+app.post('/dust', function (req, res) {
+   var dust = req.body.dust;
+   var dbname = couch.getUserDB(req.body.user, req.body.app);
+   console.log('get dust: ' + dust + " from: " + dbname);
+
+   couch.getDust(dbname, dust, function (err, dust) {
+      res.json(err ? { error: err } : { dust: dust});
+   });
 
 });
 
