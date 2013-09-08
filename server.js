@@ -56,19 +56,19 @@ app.post('/lookup', function (req, res) {
 });
 
 
-app.post('/message', function (req, res) {
-   console.log("/sync");
+app.post('/burst', function (req, res) {
+   console.log("/burst");
 
 });
 
 
 app.post('/dust', function (req, res) {
    var dust = req.body.dust;
-   var dbname = couch.getUserDB(req.body.user, req.body.app);
-   console.log('get dust: ' + dust + " from: " + dbname);
 
-   couch.getDust(dbname, dust, function (err, dust) {
-      res.json(err ? { error: err } : { dust: dust});
+   console.log('get dust: ' + dust);
+
+   couch.getDust(req.body.app, req.body.user, dust, function (err, dust) {
+      res.json(err ? { error: err } : dust );
    });
 
 });
