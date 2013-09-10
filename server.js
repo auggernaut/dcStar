@@ -2,15 +2,34 @@ var url = require('url'),
    http = require('http'),
    https = require('https'),
    express = require('express'),
+   request = require('request'),
    app = express(),
    message = require('./lib/message.js'),
    utils = require('./lib/utils.js'),
    couch = require('./lib/couch.js');
 
-app.use(express.bodyParser());
+
+
 
 var config = utils.loadConfig();
 var port = process.env.PORT || config.stardust_port || 9999;
+var DATABASE_URL = "http://" + config.couch_host + ':' + config.couch_port;
+
+// reverse proxy for couchdb
+app.use(function(req, res, next){
+   var proxy_path = req.path.match(/^\/db(.*)$/);
+   if(proxy_path){
+      var db_url = DATABASE_URL + proxy_path[1];
+      req.pipe(request({
+         uri: db_url,
+         method: req.method
+      })).pipe(res);
+   } else {
+      next();
+   }
+});
+
+app.use(express.bodyParser());
 
 
 app.listen(port, null, function (err) {
@@ -48,19 +67,6 @@ app.post('/register', function (req, res) {
 });
 
 
-app.post('/lookup', function (req, res) {
-   console.log("/lookup");
-
-   res.json({ db: couch.getUserDB(req.body.user, req.body.app) });
-
-});
-
-
-app.post('/burst', function (req, res) {
-   console.log("/burst");
-
-});
-
 
 app.post('/dust', function (req, res) {
    var dust = req.body.dust;
@@ -72,4 +78,13 @@ app.post('/dust', function (req, res) {
    });
 
 });
+
+
+
+app.post('/burst', function (req, res) {
+   console.log("/burst");
+
+});
+
+
 
