@@ -9,16 +9,14 @@ var url = require('url'),
    couch = require('./lib/couch.js');
 
 
-
-
 var config = utils.loadConfig();
 var port = process.env.PORT || config.stardust_port || 9999;
 var DATABASE_URL = "http://" + config.couch_host + ':' + config.couch_port;
 
 // reverse proxy for couchdb
-app.use(function(req, res, next){
+app.use(function (req, res, next) {
    var proxy_path = req.path.match(/^\/db(.*)$/);
-   if(proxy_path){
+   if (proxy_path) {
       var db_url = DATABASE_URL + proxy_path[1];
       req.pipe(request({
          uri: db_url,
@@ -48,24 +46,33 @@ app.all('*', function (req, res, next) {
 });
 
 
-app.post('/auth', function(req, res) {
-   request.post({
-      url: 'https://login.persona.org/verify',
-      json: {
-         assertion: req.body.assertion,
-         audience: req.body.app           //Should be hardcoded
-      }
-   }, function(e, r, body) {
-      if(body && body.email) {
-         req.session.email = body.email;
+app.post('/auth', function (req, res) {
+
+   if (req.body.assertion) {
+      //AUTH WITH PERSONA
+      request.post({
+         url: 'https://login.persona.org/verify',
+         json: {
+            assertion: req.body.assertion,
+            audience: req.body.app           //Should be hardcoded
+         }
+      }, function (e, r, body) {
+         if (body && body.email) {
+            req.session.email = body.email;
 
 
+            res.json({ success: true });
+         } else {
+            res.json({ success: false });
+         }
+      });
 
-         res.json({ success: true });
-      } else {
-         res.json({ success: false });
-      }
-   });
+   }
+   else if(req.body.fbid) {
+      //AUTH WITH FACEBOOK
+
+
+   }
 });
 
 
@@ -88,18 +95,16 @@ app.post('/register', function (req, res) {
 });
 
 
-
 app.post('/dust', function (req, res) {
    var dust = req.body.dust;
 
    console.log('get dust: ' + dust);
 
    couch.getDust(req.body.app, req.body.user, dust, function (err, dust) {
-      res.json(err ? { error: err } : dust );
+      res.json(err ? { error: err } : dust);
    });
 
 });
-
 
 
 app.post('/burst', function (req, res) {
