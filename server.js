@@ -48,6 +48,27 @@ app.all('*', function (req, res, next) {
 });
 
 
+app.post('/auth', function(req, res) {
+   request.post({
+      url: 'https://login.persona.org/verify',
+      json: {
+         assertion: req.body.assertion,
+         audience: req.body.app           //Should be hardcoded
+      }
+   }, function(e, r, body) {
+      if(body && body.email) {
+         req.session.email = body.email;
+
+
+
+         res.json({ success: true });
+      } else {
+         res.json({ success: false });
+      }
+   });
+});
+
+
 app.post('/register', function (req, res) {
    console.log("/register");
 
