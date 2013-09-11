@@ -54,21 +54,21 @@ app.post('/auth', function (req, res) {
          url: 'https://login.persona.org/verify',
          json: {
             assertion: req.body.assertion,
-            audience: req.body.app           //Should be hardcoded
+            audience: 'http://localhost:8000'           //App url
          }
       }, function (e, r, body) {
          if (body && body.email) {
-            req.session.email = body.email;
+            //req.session.email = body.email;
 
 
-            res.json({ success: true });
+            res.json({ success: body.email });
          } else {
             res.json({ success: false });
          }
       });
 
    }
-   else if(req.body.fbid) {
+   else {
       //AUTH WITH FACEBOOK
 
 
