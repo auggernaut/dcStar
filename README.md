@@ -1,22 +1,10 @@
 # StarDust
 
-StarDust represent users in the digital world. There is one StarDust per digital identity.
-StarDust house application data, control access, and provide authentication services.
-
-User-controlled application backend. Supports multiple apps and users.
+StarDust represent users in the digital world. StarDust support multiple apps and users.
+StarDust house application data and control access to that data.
 
 Functions:
 
-* authentication
 * persisting user data (dust)
 * managing access to dust
-
-
-login
-
-sync
-
-seed
-
-share
 

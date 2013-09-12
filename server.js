@@ -46,19 +46,32 @@ app.all('*', function (req, res, next) {
 });
 
 
-app.post('/auth', function (req, res) {
 
-   if (req.body.assertion) {
+
+app.post('/connect', function (req, res) {
+   console.log("/connect");
+   var app = req.headers.referer;
+   var assertion = req.body.assertion;
+
+   if (assertion) {
       //AUTH WITH PERSONA
       request.post({
          url: 'https://login.persona.org/verify',
          json: {
-            assertion: req.body.assertion,
-            audience: 'http://localhost:8000'           //App url
+            assertion: assertion,
+            audience: app
          }
       }, function (e, r, body) {
          if (body && body.email) {
-            //req.session.email = body.email;
+            //Assertion accepted, user owns body.email
+
+
+            //Lookup user/app
+            //If user/db don't exist
+               //Create user/db
+
+            //Proxy Authenticate with DB
+            //Return userCtx
 
 
             res.json({ success: body.email });
@@ -66,14 +79,14 @@ app.post('/auth', function (req, res) {
             res.json({ success: false });
          }
       });
-
+   } else {
+      res.json({ success: false });
    }
-   else {
-      //AUTH WITH FACEBOOK
 
 
-   }
 });
+
+
 
 
 app.post('/register', function (req, res) {
