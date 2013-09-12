@@ -4,13 +4,12 @@ var url = require('url'),
    express = require('express'),
    request = require('request'),
    app = express(),
-   message = require('./lib/message.js'),
    utils = require('./lib/utils.js'),
    couch = require('./lib/couch.js');
 
 
 var config = utils.loadConfig();
-var port = process.env.PORT || config.stardust_port || 9999;
+var port = process.env.PORT || config.star_port || 9999;
 var DATABASE_URL = "http://" + config.couch_host + ':' + config.couch_port;
 
 // reverse proxy for couchdb
