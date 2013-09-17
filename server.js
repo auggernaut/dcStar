@@ -4,22 +4,31 @@ var url = require('url'),
    express = require('express'),
    request = require('request'),
    app = express(),
-   utils = require('./lib/utils.js'),
-   couch = require('./lib/couch.js');
+   star = require('./lib/star.js');
 
 
-var config = utils.loadConfig();
-var port = process.env.PORT || config.star_port || 9999;
+var config = star.loadConfig();
+console.log('Configuration');
+console.log(config);
+
+var PORT = process.env.PORT || config.star_port || 9999;
 var DATABASE_URL = "http://" + config.couch_host + ':' + config.couch_port;
 
 // reverse proxy for couchdb
 app.use(function (req, res, next) {
-   var proxy_path = req.path.match(/^\/db(.*)$/);
-   if (proxy_path) {
+   var proxy_path = req.path.match(/\/db(.*)$/);
+   var token = req.path.match(/^\/t\/(.*)\/db\//);
+   if (proxy_path && token) {
       var db_url = DATABASE_URL + proxy_path[1];
+      var username = proxy_path[1].split("_")[1].split("/")[0];
       req.pipe(request({
          uri: db_url,
-         method: req.method
+         method: req.method,
+         headers: {
+            "X-Auth-CouchDB-UserName": username,
+            "X-Auth-CouchDB-Roles": "users",
+            "X-Auth-CouchDB-Token": token[1]
+         }
       })).pipe(res);
    } else {
       next();
@@ -29,10 +38,10 @@ app.use(function (req, res, next) {
 app.use(express.bodyParser());
 
 
-app.listen(port, null, function (err) {
+app.listen(PORT, null, function (err) {
    if (err)
       console.log('Error: ' + err);
-   console.log('StarDust, at your service: http://localhost:' + port);
+   console.log('Star, at your service: http://localhost:' + PORT);
 });
 
 
@@ -45,76 +54,52 @@ app.all('*', function (req, res, next) {
 });
 
 
-
-
 app.post('/connect', function (req, res) {
    console.log("/connect");
-   var app = req.headers.referer;
+   var referer = req.headers.referer;
+   var app = req.body.app;
    var assertion = req.body.assertion;
 
-   if (assertion) {
-      //AUTH WITH PERSONA
-      request.post({
-         url: 'https://login.persona.org/verify',
-         json: {
-            assertion: assertion,
-            audience: app
-         }
-      }, function (e, r, body) {
-         if (body && body.email) {
-            //Assertion accepted, user owns body.email
+   star.verify(referer, assertion, 'https://login.persona.org/verify', function (email) {
 
+      if (email) {
+         //Assertion accepted, i.e. user owns res.email
 
-            //Lookup user/app
-            //If user/db don't exist
-               //Create user/db
+         star.provision(email, app, function (err, db) {
+            if (!err) {
 
-            //Proxy Authenticate with DB
-            //Return userCtx
+               star.auth(email, function (err, naut) {
+                  if (!err) {
+                     res.json({db: db, token: naut.token, naut: naut.id, email: email});
+                  } else {
+                     res.json({ error: "auth error: " + err });
+                  }
+               });
 
+            } else {
+               res.json({ error: "provision error: " + err });
+            }
+         });
+      } else {
+         res.json({ error: "invalid assertion" });
+      }
 
-            res.json({ success: body.email });
-         } else {
-            res.json({ success: false });
-         }
-      });
-   } else {
-      res.json({ success: false });
-   }
-
-
-});
-
-
-
-
-app.post('/register', function (req, res) {
-   console.log("/register");
-
-   //TODO: Only clients of an approved app can register
-   //if (req.body.appSecret === config.appSecret) {
-
-   //create User
-   couch.createUser(req.body.creds, function (err, user) {
-
-      //create DB
-      couch.createDB(req.body.app, req.body.creds, function (err, dbname) {
-         res.json(err ? { error: err } : { db: dbname });
-      });
    });
 
-   //}
 });
 
 
 app.post('/dust', function (req, res) {
-   var dust = req.body.dust;
+   console.log('/dust: ' + req.body.dust);
 
-   console.log('get dust: ' + dust);
+   star.getDust(req.body.app, req.body.naut, req.body.dust, function(err, dust){
+      if (!err) {
+         res.json(dust);
+      } else {
+         res.json({ error: "auth error: " + err });
+      }
+   })
 
-   couch.getDust(req.body.app, req.body.user, dust, function (err, dust) {
-      res.json(err ? { error: err } : dust);
-   });
 
 });
 
@@ -125,4 +110,21 @@ app.post('/burst', function (req, res) {
 });
 
 
+app.post('/test', function (req, res) {
+
+   var email = "augmandino@gmail.com";
+   var app = "gratzi";
+
+   star.provision(email, app, function (err, db) {
+      if (!err) {
+         star.auth(email, function (err, userCtx) {
+
+            res.json(userCtx);
+
+         });
+      }
+   });
+
+
+});
 

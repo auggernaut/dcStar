@@ -2,6 +2,7 @@
    "couch_host": "COUCH_HOST",
    "couch_port": "COUCH_PORT",
    "couch_admin": "COUCH_ADMIN",
-   "couch_password": "COUCH_PASSWORD",
-   "star_port": "STARDUST_PORT"
+   "couch_pass": "COUCH_PASS",
+   "couch_secret": "COUCH_SECRET",
+   "star_port": "STAR_PORT"
 }
