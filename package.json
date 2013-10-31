@@ -1,13 +1,25 @@
 {
-  "name"          : "Star",
-  "description"   : "Handles user data storage for a datacosmos app.",
-  "url"           : "http://github.com/auggernaut/dcStar",
-  "keywords"      : ["star, datacosmos"],
-  "author"        : "Augustin Bralley",
-  "contributors"  : [],
-  "dependencies"  : ["express", "q", "nano", "request"],
-  "engines"       : { "node": "0.6.x" },
-  "lib"           : "./lib",
-  "main"          : "index",
-  "version"       : "0.1.0"
+    "name": "Star",
+    "description": "Handles user data storage for a datacosmos app.",
+    "url": "http://github.com/auggernaut/dcStar",
+    "keywords": [
+        "star, datacosmos"
+    ],
+    "author": "Augustin Bralley",
+    "contributors": [],
+    "dependencies": [
+        "express",
+        "q",
+        "nano",
+        "request",
+        "sendgrid-web",
+        "querystring",
+        "noflo"
+    ],
+    "engines": {
+        "node": "0.6.x"
+    },
+    "lib": "./lib",
+    "main": "index",
+    "version": "0.1.0"
 }

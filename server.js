@@ -3,8 +3,11 @@ var url = require('url'),
    https = require('https'),
    express = require('express'),
    request = require('request'),
+   Sendgrid = require("sendgrid-web"),
+    qs = require('querystring'),
    app = express(),
-   star = require('./lib/star.js');
+   star = require('./lib/star.js'),
+    noflo = require("noflo");
 
 
 var config = star.loadConfig();
@@ -60,6 +63,24 @@ app.post('/connect', function (req, res) {
    var app = req.body.app;
    var assertion = req.body.assertion;
 
+    var graph;
+
+    graph = new noflo.Graph("Connect")
+    graph.addNode("Verify", "VerifyNaut");
+    graph.addNode("Display", "Output");
+    graph.addEdge("Verify", "out", "Display", "in");
+    graph.addInitial(referer, "Verify", "domain");
+    graph.addInitial("login.persona.org", "Verify", "idp");
+    graph.addInitial(assertion, "Verify", "in");
+
+/*    graph.addNode("Bind", "BindStar");
+    graph.addNode("Token", "GetDBToken");
+    graph.addEdge("Verify", "out", "Bind", "in");
+    graph.addEdge("Bind", "out", "Token", "in");*/
+
+    noflo.createNetwork(graph);
+
+/*
    star.verify(referer, assertion, 'https://login.persona.org/verify', function (email) {
 
       if (email) {
@@ -84,7 +105,7 @@ app.post('/connect', function (req, res) {
          res.json({ error: "invalid assertion" });
       }
 
-   });
+   });*/
 
 });
 
@@ -99,7 +120,83 @@ app.post('/dust', function (req, res) {
          res.json({ error: "auth error: " + err });
       }
    })
+});
 
+app.post('/event', function(req, res){
+    console.log('/event: ' + req.body.event);
+    //check which kind of event, launch appropriate noflo graph
+
+/*    noflo.loadFile("graphs/eventZi.fbp", function(network) {
+        console.log("Graph loaded");
+        return console.log(network.graph.toDOT());
+    });*/
+
+    var graph;
+
+    graph = new noflo.Graph("Events")
+    graph.addNode("Events", "PostEvent");
+    graph.addNode("Display", "Output");
+    graph.addEdge("Events", "out", "Display", "in");
+    graph.addInitial("from Augustin", "Events", "from");
+    graph.addInitial("to Becca", "Events", "to");
+    noflo.createNetwork(graph);
+
+
+
+
+});
+
+
+app.post('/email', function(req, res){
+
+    var email = req.body.email;
+
+    var sendgrid = new Sendgrid({
+        user: config.sendgrid_username,
+        key: config.sendgrid_key
+    });
+
+    sendgrid.send({
+        to: email.to,
+        from: email.from,
+        subject: email.subject,
+        html: email.message
+    }, function (err) {
+        if (err) {
+            res.json({status: "error", details: err});
+        } else {
+            res.json({status: "Success"});
+        }
+    });
+});
+
+
+app.post('/encode', function(req, res){
+
+    var data = {
+        input: req.body.url
+    }
+
+    var reqOptions = {
+        host: 'app.zencoder.com',
+        port: '443',
+        path: '/api/v2/jobs',
+        method: 'POST',
+        headers: { "Zencoder-Api-Key": config.zencode_key }
+    };
+
+    var body = "";
+    var req = https.request(reqOptions, function (res) {
+        res.setEncoding('utf8');
+        res.on('data', function (chunk) { body += chunk; });
+        res.on('end', function () {
+            res.json({ job: "https://app.zencoder.com/jobs/" + qs.parse(body).id });
+        });
+    });
+
+    req.write(data);
+    req.end();
+    req.on('error', function (e) {  res.json(e.message); });
 
 });
 
